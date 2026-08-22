@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARTIKA - Ganancias</title>
+  <link rel="stylesheet" href="sistema.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="container">
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-content">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+          <img src="Imagenes/Logo.jpg" alt="ARTIKA" class="header-logo">
+          <div>
+            <h1>ARTIKA - GANANCIAS</h1>
+            <p>Resumen del Día</p>
+          </div>
+        </div>
+      </div>
+      <button class="btn-refresh" onclick="cargarGanancias()" title="Actualizar">🔄</button>
+    </header>
+
+    <!-- NAVBAR NAVEGACIÓN -->
+    <nav class="navbar">
+      <a href="pedidos.html" class="nav-link">📝 Pedidos</a>
+      <a href="cobro.html" class="nav-link">💰 Cobro</a>
+      <a href="ganancias.html" class="nav-link active">📊 Ganancias</a>
+    </nav>
+
+    <main class="main-content" style="grid-template-columns: 1fr; max-width: 600px; margin: 0 auto;">
+      <!-- PANTALLA DE PIN -->
+      <div id="pinScreen" class="pin-screen" style="display: block;">
+        <div class="pin-container">
+          <h2>🔐 Acceso Restringido</h2>
+          <p>Ingresa el PIN para ver ganancias</p>
+
+          <div class="pin-input-group">
+            <input type="tel" class="pin-digit" maxlength="1" oninput="avanzarPin(this, 'pin1')">
+            <input type="tel" class="pin-digit" maxlength="1" oninput="avanzarPin(this, 'pin2')">
+            <input type="tel" class="pin-digit" maxlength="1" oninput="avanzarPin(this, 'pin3')">
+            <input type="tel" class="pin-digit" maxlength="1" oninput="avanzarPin(this, 'pin4')">
+          </div>
+
+          <button class="btn-primary" onclick="verificarPin()">🔓 VERIFICAR</button>
+        </div>
+      </div>
+
+      <!-- CONTENIDO DE GANANCIAS -->
+      <div id="gainingsContent" style="display: none;">
+        <section class="cart-section">
+          <div class="section-title">📊 Resumen del Día</div>
+
+          <!-- FILTROS DE FECHA -->
+          <div style="background: rgba(0, 255, 255, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #00FFFF;">
+            <div style="color: #FFFFFF; font-weight: bold; margin-bottom: 10px;">📅 Filtrar por Fecha</div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button class="btn-option small" onclick="filtrarPorHoy()">📆 Hoy</button>
+              <button class="btn-option small" onclick="filtrarPorAyer()">⏮️ Ayer</button>
+              <button class="btn-option small" onclick="filtrarPor7Dias()">📈 Últimos 7 días</button>
+              <button class="btn-option small" onclick="mostrarFilterPersonalizado()">📋 Intervalo</button>
+              <button class="btn-option small" onclick="filtrarTodo()">📊 Todo</button>
+            </div>
+
+            <!-- FILTRO PERSONALIZADO (OCULTO) -->
+            <div id="filterPersonalizado" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.2);">
+              <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                <input type="date" id="fechaInicio" style="padding: 8px; border-radius: 5px; border: 1px solid #00FFFF; background: rgba(0, 255, 255, 0.1); color: #FFFFFF;">
+                <span style="color: #FFFFFF;">hasta</span>
+                <input type="date" id="fechaFin" style="padding: 8px; border-radius: 5px; border: 1px solid #00FFFF; background: rgba(0, 255, 255, 0.1); color: #FFFFFF;">
+                <button class="btn-option small" onclick="filtrarPorIntervalo()">🔍 Filtrar</button>
+              </div>
+            </div>
+
+            <div id="filtroActual" style="color: #00FFFF; font-size: 0.9em; margin-top: 10px;">Mostrando: Todo</div>
+          </div>
+
+          <!-- TARJETAS DE RESUMEN -->
+          <div id="summaryCards" style="display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 25px;">
+            <!-- Se llenarán con JS -->
+          </div>
+
+          <!-- CALCULADOR SIMPLIFICADO -->
+          <div style="background: rgba(255, 0, 255, 0.1); padding: 20px; border-radius: 8px; margin: 30px 0; border-left: 4px solid #FF00FF;">
+            <div style="color: #FFFFFF; font-weight: bold; margin-bottom: 15px; font-size: 1.1em;">📊 ¿Si vendiera X granizados/día?</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+              <button class="btn-option small" onclick="calcularProyeccion(5)">5 granizados</button>
+              <button class="btn-option small" onclick="calcularProyeccion(10)">10 granizados</button>
+              <button class="btn-option small" onclick="calcularProyeccion(15)">15 granizados</button>
+              <button class="btn-option small" onclick="calcularProyeccion(20)">20 granizados</button>
+            </div>
+            <div id="resultadoProyeccion" style="color: #00FFFF; font-size: 0.95em;">
+              <!-- Se llena con JS -->
+            </div>
+          </div>
+
+          <!-- TABLA DE PRODUCTOS -->
+          <div class="section-title" style="margin-top: 30px;">🏆 Productos Más Vendidos</div>
+          <div id="productsTable" class="cart-items">
+            <div class="empty-cart">Cargando...</div>
+          </div>
+
+          <!-- BOTÓN VOLVER -->
+          <button class="btn-secondary" onclick="salirGanancias()" style="width: 100%; margin-top: 20px;">
+            ← Volver a Pedidos
+          </button>
+        </section>
+      </div>
+    </main>
+
+    <!-- OVERLAY MODAL -->
+    <div id="pinOverlay" class="modal-overlay" style="display: none;"></div>
+  </div>
+
+  <script src="ganancias.js"></script>
+</body>
+</html>

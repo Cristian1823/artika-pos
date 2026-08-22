@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARTIKA - Sistema de Pedidos</title>
+  <link rel="stylesheet" href="sistema.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="container">
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-content">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+          <img src="Imagenes/Logo.jpg" alt="ARTIKA" class="header-logo">
+          <div>
+            <h1>ARTIKA GRANIZADOS</h1>
+            <p>Sistema de Pedidos</p>
+          </div>
+        </div>
+      </div>
+      <button class="btn-refresh" onclick="cargarProductos(true)" title="Actualizar">🔄</button>
+    </header>
+
+    <!-- NAVBAR NAVEGACIÓN -->
+    <nav class="navbar">
+      <a href="pedidos.html" class="nav-link active">📝 Pedidos</a>
+      <a href="cobro.html" class="nav-link">💰 Cobro</a>
+      <a href="ganancias.html" class="nav-link">📊 Ganancias</a>
+    </nav>
+
+    <main class="main-content">
+      <!-- SECCIÓN IZQUIERDA: SELECCIÓN DE PRODUCTOS -->
+      <section class="products-section">
+        <div class="section-title">Selecciona tu Granizado</div>
+
+        <!-- GRANIZADO SIN ALCOHOL -->
+        <div class="option-group">
+          <label>❄️ Granizado SIN Alcohol</label>
+          <div class="button-group">
+            <button class="btn-option" onclick="agregarAlCarrito('G001', '9oz', false, 8000)">
+              9oz - $8,000
+            </button>
+            <button class="btn-option" onclick="agregarAlCarrito('G002', '12oz', false, 12500)">
+              12oz - $12,500
+            </button>
+            <button class="btn-option" onclick="agregarAlCarrito('G003', '16oz', false, 17000)">
+              16oz - $17,000
+            </button>
+          </div>
+        </div>
+
+        <!-- GRANIZADO CON ALCOHOL -->
+        <div class="option-group">
+          <label>🍺 Granizado CON Alcohol</label>
+          <div class="button-group">
+            <button class="btn-option" onclick="agregarAlCarrito('G004', '9oz', true, 9000)">
+              9oz - $9,000
+            </button>
+            <button class="btn-option" onclick="agregarAlCarrito('G005', '12oz', true, 15000)">
+              12oz - $15,000
+            </button>
+            <button class="btn-option" onclick="agregarAlCarrito('G006', '16oz', true, 20000)">
+              16oz - $20,000
+            </button>
+          </div>
+        </div>
+
+        <!-- JERINGAS ADICIONALES -->
+        <div class="option-group">
+          <label>💉 Agregar Jeringas (Opcional)</label>
+          <div class="button-group jeringa-group">
+            <button class="btn-option small" onclick="agregarJeringa('J001', 5, 2000)">
+              5ml - $2,000
+            </button>
+            <button class="btn-option small" onclick="agregarJeringa('J002', 10, 3000)">
+              10ml - $3,000
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN DERECHA: CARRITO Y COBRO -->
+      <section class="cart-section">
+        <div class="section-title">🛒 Carrito de Pedido</div>
+
+        <!-- ITEMS DEL CARRITO -->
+        <div class="cart-items" id="cartItems">
+          <div class="empty-cart">Carrito vacío</div>
+        </div>
+
+        <!-- RESUMEN -->
+        <div class="cart-summary">
+          <div class="summary-row">
+            <span>Subtotal:</span>
+            <span id="subtotal">$0</span>
+          </div>
+          <div class="summary-row">
+            <span>Total:</span>
+            <span id="totalPrice" class="total-price">$0</span>
+          </div>
+        </div>
+
+        <!-- BOTONES DE ACCIÓN -->
+        <div class="cart-actions">
+          <button class="btn-secondary" onclick="limpiarCarrito()">🗑️ Limpiar</button>
+          <button class="btn-primary" onclick="enviarACocina()">💾 GUARDAR PEDIDO</button>
+        </div>
+      </section>
+    </main>
+
+  </div>
+
+  <script src="sistema.js"></script>
+</body>
+</html>

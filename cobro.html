@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARTIKA - Cobro</title>
+  <link rel="stylesheet" href="sistema.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="container">
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-content">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+          <img src="Imagenes/Logo.jpg" alt="ARTIKA" class="header-logo">
+          <div>
+            <h1>ARTIKA - COBRO</h1>
+            <p>Pedidos Listos para Cobrar</p>
+          </div>
+        </div>
+      </div>
+      <button class="btn-refresh" onclick="cargarPedidos()" title="Actualizar">🔄</button>
+    </header>
+
+    <!-- NAVBAR NAVEGACIÓN -->
+    <nav class="navbar">
+      <a href="pedidos.html" class="nav-link">📝 Pedidos</a>
+      <a href="cobro.html" class="nav-link active">💰 Cobro</a>
+      <a href="ganancias.html" class="nav-link">📊 Ganancias</a>
+    </nav>
+
+    <main class="main-content">
+      <!-- SECCIÓN CENTRAL: PEDIDOS -->
+      <section class="cart-section" style="grid-column: 1 / -1; max-width: 800px; margin: 0 auto;">
+        <div class="section-title">📋 Pedidos Pendientes de Cobro</div>
+
+        <!-- LISTA DE PEDIDOS -->
+        <div id="pedidosList" class="cart-items">
+          <div class="empty-cart">Cargando pedidos...</div>
+        </div>
+
+        <!-- TOTAL GENERAL -->
+        <div class="cart-summary">
+          <div class="summary-row">
+            <span>Total Pendiente:</span>
+            <span id="totalPendiente" class="total-price">$0</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- MODAL DE COBRO -->
+    <div id="cobroModal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>💰 Cobro del Pedido</h2>
+          <button class="btn-close" onclick="cerrarCobro()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- ID DEL PEDIDO -->
+          <div class="total-a-pagar">
+            <label>ID del Pedido:</label>
+            <div id="pedidoID" style="font-size: 0.9em; color: #ccc;">-</div>
+          </div>
+
+          <!-- TOTAL A PAGAR -->
+          <div class="total-a-pagar">
+            <label>Total a Pagar:</label>
+            <div id="totalAPagar" class="precio-grande">$0</div>
+          </div>
+
+          <!-- BILLETE RECIBIDO -->
+          <div class="option-group">
+            <label>💵 ¿Con qué billete paga?</label>
+            <div class="button-group billete-group">
+              <button class="btn-option" onclick="calcularCambio(2000)">$2,000</button>
+              <button class="btn-option" onclick="calcularCambio(5000)">$5,000</button>
+              <button class="btn-option" onclick="calcularCambio(10000)">$10,000</button>
+              <button class="btn-option" onclick="calcularCambio(20000)">$20,000</button>
+              <button class="btn-option" onclick="calcularCambio(30000)">$30,000</button>
+              <button class="btn-option" onclick="calcularCambio(50000)">$50,000</button>
+              <button class="btn-option" onclick="calcularCambio(100000)">$100,000</button>
+            </div>
+          </div>
+
+          <!-- ENTRADA MANUAL -->
+          <div class="option-group">
+            <label>O ingresa cantidad personalizada:</label>
+            <div class="input-group">
+              <input type="number" id="billetePerson" class="input-billete" placeholder="Ingresa cantidad" min="0">
+              <button class="btn-primary" onclick="calcularCambioPersonalizado()">Calcular</button>
+            </div>
+          </div>
+
+          <!-- RESULTADO -->
+          <div id="resultadoCambio" class="resultado-cambio" style="display: none;">
+            <div class="cambio-info">
+              <div class="cambio-row">
+                <span>Recibido:</span>
+                <span id="recibido" class="cambio-valor">$0</span>
+              </div>
+              <div class="cambio-row">
+                <span>Total:</span>
+                <span id="totalCambio" class="cambio-valor">$0</span>
+              </div>
+              <div class="cambio-row cambio-final">
+                <span>💵 CAMBIO:</span>
+                <span id="cambio" class="cambio-valor">$0</span>
+              </div>
+            </div>
+
+            <div class="cambio-message" id="cambioMessage"></div>
+
+            <!-- BOTONES FINALES -->
+            <div class="modal-actions">
+              <button class="btn-secondary" onclick="cerrarCobro()">Cancelar</button>
+              <button class="btn-primary" onclick="finalizarCobro()">✅ COBRADO</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OVERLAY MODAL -->
+    <div id="cobroOverlay" class="modal-overlay" style="display: none;" onclick="cerrarCobro()"></div>
+  </div>
+
+  <script src="cobro.js"></script>
+</body>
+</html>
