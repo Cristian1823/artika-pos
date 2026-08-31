@@ -21,6 +21,9 @@ Sistema web de toma de pedidos para **ARTIKA GRANIZADOS**, un negocio especializ
 - Cálculo automático de cambio
 - Validación de pago suficiente
 - Interfaz clara y accesible
+- **NUEVO:** Botón ✕ para eliminar pedidos duplicados directamente
+- **NUEVO:** IDs secuenciales cortos (PED-0001, PED-0002, etc.)
+- **NUEVO:** Visualización limpia de pedidos sin caracteres codificados
 
 ### 3. Panel de Ganancias
 - Resumen diario de ventas (Total vendido, Pedidos, Ticket promedio)
@@ -30,6 +33,8 @@ Sistema web de toma de pedidos para **ARTIKA GRANIZADOS**, un negocio especializ
 - Calculador de proyecciones: "Si vendiera X granizados/día"
 - Proyección mensual realista (4 días/semana)
 - PIN protegido (1130)
+- **NUEVO:** Validación automática del PIN (sin botón de confirmación)
+- **NUEVO:** Overlay fullscreen centrado perfectamente
 
 ### 4. Branding Neon
 - Colores: Cyan (#00FFFF), Magenta (#FF00FF), Púrpura (#8B00FF)
@@ -192,6 +197,28 @@ Artika/
 - Con alcohol (9oz): ~$7,500-8,000 margen
 - Mayor tamaño = mejor margen
 
+## Gestión Inteligente de Pedidos
+
+### Prevención de Duplicados (Conexión Lenta)
+- ✅ Botón desabilidado mientras procesa la solicitud
+- ✅ Mensaje visual: "⏳ Guardando..."
+- ✅ Flag `guardandoPedido` impide múltiples clics simultáneos
+- ✅ Si la conexión falla, el botón se reabilita automáticamente
+- ✅ **Resultado:** Imposible duplicar pedidos por problemas de internet
+
+### Eliminar Pedidos Duplicados
+- ✅ Botón **✕** visible en cada pedido de la pantalla de COBRO
+- ✅ Confirmación antes de eliminar
+- ✅ Eliminación inmediata de Google Sheets
+- ✅ Recálculo automático de ganancias
+- ✅ **Flujo:** Operario ve duplicado → Clic ✕ → Pedido eliminado → Ganancias correctas
+
+### IDs Secuenciales y Visualización Limpia
+- ✅ IDs cortos: `PED-0001`, `PED-0002`, etc. (legible)
+- ✅ Decodificación automática de caracteres URL
+- ✅ Formato de fecha/hora mejorado: `2026-08-30 - 14:30`
+- ✅ Eliminación automática de caracteres codificados (`%20`, `%7C`, etc.)
+
 ## Deploy en Producción ✅
 
 **URL en vivo:** https://artika-pos.pages.dev
@@ -297,7 +324,7 @@ Este proyecto es propiedad de ARTIKA GRANIZADOS.
 ---
 
 **Última actualización:** Agosto 2026  
-**Versión:** 1.0.0 - Lanzamiento en producción  
+**Versión:** 1.1.0 - Mejoras en manejo de pedidos  
 **Estado:** ✅ En producción  
 **URL:** https://artika-pos.pages.dev  
 **GitHub:** https://github.com/Cristian1823/artika-pos
@@ -311,3 +338,9 @@ Este proyecto es propiedad de ARTIKA GRANIZADOS.
 - ✅ Deploy en Cloudflare Pages
 - ✅ Repositorio GitHub con README
 - ✅ Branding Neon personalizado
+- ✅ **NUEVO v1.1:** Prevención de duplicados por conexión lenta
+- ✅ **NUEVO v1.1:** Eliminación de pedidos duplicados desde pantalla de cobro
+- ✅ **NUEVO v1.1:** IDs secuenciales cortos (PED-0001, etc.)
+- ✅ **NUEVO v1.1:** Visualización limpia de pedidos (sin caracteres codificados)
+- ✅ **NUEVO v1.1:** Validación automática de PIN en ganancias
+- ✅ **NUEVO v1.1:** Google Apps Script con función eliminarPedidoAPI
