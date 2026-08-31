@@ -49,27 +49,31 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ============================================
-// NAVEGACIÓN DE PIN
+// NAVEGACIÓN Y VALIDACIÓN DE PIN
 // ============================================
-function avanzarPin(input, fieldId) {
+function avanzarPin(input) {
   if (input.value.length === 1) {
-    // Pasar al siguiente campo
     const campos = document.querySelectorAll('.pin-digit');
     const indice = Array.from(campos).indexOf(input);
+
+    // Si no es el último campo, avanzar al siguiente
     if (indice < campos.length - 1) {
       campos[indice + 1].focus();
+    }
+
+    // Verificar si todos los campos están llenos
+    const pinIngresado = Array.from(campos).map(c => c.value).join('');
+
+    if (pinIngresado.length === 4) {
+      // Validar PIN automáticamente después de 100ms
+      setTimeout(() => {
+        validarPin(pinIngresado);
+      }, 100);
     }
   }
 }
 
-function verificarPin() {
-  const pin1 = document.querySelectorAll('.pin-digit')[0].value;
-  const pin2 = document.querySelectorAll('.pin-digit')[1].value;
-  const pin3 = document.querySelectorAll('.pin-digit')[2].value;
-  const pin4 = document.querySelectorAll('.pin-digit')[3].value;
-
-  const pinIngresado = pin1 + pin2 + pin3 + pin4;
-
+function validarPin(pinIngresado) {
   if (pinIngresado === PIN_CORRECTO) {
     document.getElementById('pinScreen').style.display = 'none';
     document.getElementById('gainingsContent').style.display = 'block';

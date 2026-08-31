@@ -33,7 +33,9 @@
     <main class="main-content">
       <!-- SECCIÓN CENTRAL: PEDIDOS -->
       <section class="cart-section" style="grid-column: 1 / -1; max-width: 800px; margin: 0 auto;">
-        <div class="section-title">📋 Pedidos Pendientes de Cobro</div>
+        <div class="section-title">📋 Pedidos Pendientes de Cobro
+          <button class="btn-secondary" style="float: right; padding: 5px 10px; font-size: 12px;" onclick="cargarPedidos()">🔄 Actualizar</button>
+        </div>
 
         <!-- LISTA DE PEDIDOS -->
         <div id="pedidosList" class="cart-items">

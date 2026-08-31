@@ -72,23 +72,42 @@ function actualizarPedidosList() {
 
     const itemDiv = document.createElement('div');
     itemDiv.className = 'cart-item';
-    itemDiv.style.cursor = 'pointer';
-    itemDiv.onclick = () => abrirCobro(pedido);
 
     const fecha = pedido.fecha || '-';
     const hora = pedido.hora || '-';
     const total = parseInt(pedido.total) || 0;
 
+    // Decodificar y limpiar notas
+    let notasLimpio = pedido.notas || '';
+    try {
+      notasLimpio = decodeURIComponent(notasLimpio);
+    } catch(e) {
+      // Si ya está decodificado, lo dejamos como está
+    }
+    // Remover "Cambio: $0" del final si existe
+    notasLimpio = notasLimpio.replace(/\s*\|\s*Cambio:\s*\$\d+\s*$/, '').trim();
+
     itemDiv.innerHTML = `
-      <div class="cart-item-info">
-        <div class="cart-item-name">Pedido #${pedido.id}</div>
+      <div class="cart-item-info" style="cursor: pointer; flex: 1;" onclick="abrirCobro({
+        id: '${pedido.id}',
+        fecha: '${fecha}',
+        hora: '${hora}',
+        items: '${pedido.items.replace(/'/g, "\\'")}',
+        total: ${total},
+        dulce: '${pedido.dulce}',
+        alcohol: '${pedido.alcohol}',
+        notas: '${notasLimpio.replace(/'/g, "\\'")}',
+        estado: '${pedido.estado}'
+      })">
+        <div class="cart-item-name">📋 ${pedido.id}</div>
         <div class="cart-item-details">
-          🕐 ${fecha} ${hora}<br>
-          📝 ${pedido.notas || 'Sin notas'}
+          🕐 ${fecha} - ${hora}<br>
+          📝 ${notasLimpio}
         </div>
       </div>
-      <div>
+      <div style="display: flex; gap: 10px; align-items: center;">
         <div class="cart-item-price">$${total.toLocaleString('es-CO')}</div>
+        <button class="btn-remove-item" onclick="event.stopPropagation(); eliminarPedidoDuplicado('${pedido.id}')" title="Eliminar este pedido">✕</button>
       </div>
     `;
 
@@ -228,4 +247,53 @@ function finalizarCobro() {
   document.body.appendChild(script);
 
   console.log('📤 Registrando cobro...');
+}
+
+// ============================================
+// ELIMINAR PEDIDO DUPLICADO
+// ============================================
+function eliminarPedidoDuplicado(pedidoId) {
+  if (!confirm(`¿Estás seguro de que quieres eliminar el pedido ${pedidoId}?\n\nEsta acción no se puede deshacer.`)) {
+    return;
+  }
+
+  const callbackName = 'handleEliminar_' + Date.now();
+
+  const params = {
+    action: 'eliminarPedido',
+    id: pedidoId,
+    callback: callbackName
+  };
+
+  const queryString = Object.keys(params)
+    .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k]))
+    .join('&');
+
+  const url = API_URL + '?' + queryString;
+
+  const script = document.createElement('script');
+  script.src = url;
+
+  window[callbackName] = function(response) {
+    if (response.success) {
+      alert(`✅ Pedido ${pedidoId} eliminado correctamente\n\nEl cálculo de ganancias se actualizará automáticamente`);
+      cargarPedidos();
+      console.log('🗑️ Pedido eliminado exitosamente');
+    } else {
+      alert(`❌ Error: ${response.error}`);
+      console.error('Error al eliminar:', response);
+    }
+
+    document.body.removeChild(script);
+    delete window[callbackName];
+  };
+
+  script.onerror = function() {
+    alert('❌ Error de conexión al eliminar el pedido');
+    document.body.removeChild(script);
+  };
+
+  document.body.appendChild(script);
+
+  console.log('📤 Eliminando pedido...');
 }

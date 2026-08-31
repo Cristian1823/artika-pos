@@ -5,6 +5,7 @@ const API_URL = `https://script.google.com/macros/s/AKfycbxRZPNJXwywxdLBAsmQH2DF
 
 // DATOS LOCALES
 let carrito = [];
+let guardandoPedido = false;
 
 // ============================================
 // INICIALIZACIÓN
@@ -141,11 +142,25 @@ function enviarACocina() {
     return;
   }
 
+  // Prevenir duplicados por mala conexión
+  if (guardandoPedido) {
+    alert('⏳ Por favor espera, el pedido se está procesando...');
+    return;
+  }
+
+  guardandoPedido = true;
+  const btnGuardar = document.querySelector('.btn-primary');
+  if (btnGuardar) {
+    btnGuardar.disabled = true;
+    btnGuardar.style.opacity = '0.5';
+    btnGuardar.textContent = '⏳ Guardando...';
+  }
+
   console.log('🔄 Iniciando guardado de pedido...');
   console.log('API_URL:', API_URL);
 
   const total = carrito.reduce((sum, item) => sum + item.total, 0);
-  const callbackName = 'handlePedido_' + Math.random().toString(36).substr(2, 9);
+  const callbackName = 'handlePedido_' + Math.random().toString(36).substring(2, 11);
 
   const items = JSON.stringify(carrito);
   const jeringasCount = carrito.filter(i => i.tipo === 'jeringa').length;
@@ -174,9 +189,13 @@ function enviarACocina() {
 
     const script = document.createElement('script');
     script.src = url;
+    script.timeout = 15000;
+
     script.onerror = function() {
-      alert('❌ Error de conexión con el servidor');
+      alert('❌ Error de conexión con el servidor. Verifica tu internet e intenta de nuevo.');
       console.error('Error en JSONP');
+      guardandoPedido = false;
+      resetearBotonGuardar(btnGuardar);
       document.body.removeChild(script);
     };
 
@@ -195,6 +214,8 @@ function enviarACocina() {
         console.error('Error al guardar:', response);
       }
 
+      guardandoPedido = false;
+      resetearBotonGuardar(btnGuardar);
       document.body.removeChild(script);
       delete window[callbackName];
     };
@@ -205,6 +226,16 @@ function enviarACocina() {
   } catch (err) {
     console.error('❌ Error:', err);
     alert('❌ Error al procesar el pedido: ' + err.message);
+    guardandoPedido = false;
+    resetearBotonGuardar(btnGuardar);
+  }
+}
+
+function resetearBotonGuardar(btn) {
+  if (btn) {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.textContent = '💾 GUARDAR PEDIDO';
   }
 }
 
@@ -212,6 +243,6 @@ function enviarACocina() {
 // ============================================
 // CARGAR PRODUCTOS
 // ============================================
-function cargarProductos(forzar = false) {
+function cargarProductos() {
   console.log('📦 Productos cargados');
 }

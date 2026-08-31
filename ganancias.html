@@ -30,23 +30,24 @@
       <a href="ganancias.html" class="nav-link active">📊 Ganancias</a>
     </nav>
 
-    <main class="main-content" style="grid-template-columns: 1fr; max-width: 600px; margin: 0 auto;">
-      <!-- PANTALLA DE PIN -->
-      <div id="pinScreen" class="pin-screen" style="display: block;">
-        <div class="pin-container">
-          <h2>🔐 Acceso Restringido</h2>
-          <p>Ingresa el PIN para ver ganancias</p>
+    <!-- PANTALLA DE PIN (OVERLAY FULLSCREEN) -->
+    <div id="pinScreen" class="pin-screen" style="display: flex;">
+      <div class="pin-container">
+        <h2>🔐 Acceso Restringido</h2>
+        <p>Ingresa el PIN para ver ganancias</p>
 
-          <div class="pin-input-group">
-            <input type="tel" class="pin-digit" maxlength="1" oninput="avanzarPin(this, 'pin1')">
-            <input type="tel" class="pin-digit" maxlength="1" oninput="avanzarPin(this, 'pin2')">
-            <input type="tel" class="pin-digit" maxlength="1" oninput="avanzarPin(this, 'pin3')">
-            <input type="tel" class="pin-digit" maxlength="1" oninput="avanzarPin(this, 'pin4')">
-          </div>
-
-          <button class="btn-primary" onclick="verificarPin()">🔓 VERIFICAR</button>
+        <div class="pin-input-group">
+          <input type="tel" class="pin-digit" maxlength="1" oninput="avanzarPin(this)">
+          <input type="tel" class="pin-digit" maxlength="1" oninput="avanzarPin(this)">
+          <input type="tel" class="pin-digit" maxlength="1" oninput="avanzarPin(this)">
+          <input type="tel" class="pin-digit" maxlength="1" oninput="avanzarPin(this)">
         </div>
+
+        <p style="color: rgba(10, 14, 39, 0.7); font-size: 0.85em; margin-top: 20px;">Se validará automáticamente</p>
       </div>
+    </div>
+
+    <main class="main-content" style="grid-template-columns: 1fr; max-width: 600px; margin: 0 auto;">
 
       <!-- CONTENIDO DE GANANCIAS -->
       <div id="gainingsContent" style="display: none;">

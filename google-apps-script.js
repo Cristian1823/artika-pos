@@ -79,6 +79,9 @@ function doGet(e) {
       case 'actualizarPedido':
         response = actualizarPedidoAPI(e.parameter);
         break;
+      case 'eliminarPedido':
+        response = eliminarPedidoAPI(e.parameter);
+        break;
       default:
         response = { error: 'Acción no reconocida' };
     }
@@ -353,15 +356,20 @@ function getAlcohol() {
 function guardarPedidoAPI(params) {
   try {
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Pedidos");
-    const id = "PED-" + Date.now();
+
+    // Generar ID secuencial corto
+    const data = sheet.getDataRange().getValues();
+    const numeroSecuencial = data.length; // Usa el número de filas (incluyendo header)
+    const id = "PED-" + String(numeroSecuencial).padStart(4, '0');
+
     const fecha = formatoFecha(new Date());
-    const hora = new Date().toLocaleTimeString('es-CO');
+    const hora = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
 
     const items = decodeURIComponent(params.items);
     const total = parseInt(params.total);
     const dulce = params.dulce || "";
     const alcohol = params.alcohol || "";
-    const notas = params.notas || "";
+    const notas = decodeURIComponent(params.notas || "");
     const cambio = params.cambio || "";
 
     sheet.appendRow([
@@ -372,7 +380,7 @@ function guardarPedidoAPI(params) {
       total,
       dulce,
       alcohol,
-      `${notas} | Cambio: $${cambio}`,
+      `${notas}`,
       "pendiente"
     ]);
 
@@ -587,6 +595,39 @@ function actualizarPedidoAPI(params) {
         return {
           success: true,
           mensaje: "Pedido actualizado"
+        };
+      }
+    }
+
+    return {
+      success: false,
+      error: "Pedido no encontrado"
+    };
+  } catch(err) {
+    return {
+      success: false,
+      error: err.toString()
+    };
+  }
+}
+
+// ============================================
+// API: ELIMINAR PEDIDO
+// ============================================
+function eliminarPedidoAPI(params) {
+  try {
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Pedidos");
+    const data = sheet.getDataRange().getValues();
+
+    const id = params.id;
+
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0] === id) {
+        sheet.deleteRow(i + 1);
+
+        return {
+          success: true,
+          mensaje: `Pedido ${id} eliminado correctamente`
         };
       }
     }
