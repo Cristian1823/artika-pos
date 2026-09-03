@@ -14,6 +14,8 @@ Sistema web de toma de pedidos para **ARTIKA GRANIZADOS**, un negocio especializ
 - Jeringas adicionales opcionales
 - Carrito de pedido en tiempo real
 - Notas de pedido
+- **NUEVO:** Sistema de descuentos (0%, 10%, 15%, 20%) por producto
+- **NUEVO:** Visualización clara de precio original vs precio con descuento
 
 ### 2. Pantalla de Cobro
 - Botones de billetes rápidos ($2,000 a $100,000 COP)
@@ -197,6 +199,46 @@ Artika/
 - Con alcohol (9oz): ~$7,500-8,000 margen
 - Mayor tamaño = mejor margen
 
+## Sistema de Descuentos por Oferta Temporal
+
+### Opciones de Descuento
+- ✅ **0% (Sin descuento)** — Precio normal
+- ✅ **10% OFF** — Descuento moderado (recomendado para volumen)
+- ✅ **15% OFF** — Descuento atractivo (oferta especial)
+- ✅ **20% OFF** — Descuento máximo (oferta agresiva)
+
+### Flujo de Descuentos
+1. **Selecciona descuento** en pantalla de pedidos antes de agregar
+2. **Agregar producto** → Se aplica automáticamente
+3. **Carrito muestra:**
+   - Precio original
+   - Monto de descuento
+   - Precio final
+
+4. **Google Sheets guarda:**
+   - Porcentaje aplicado
+   - Monto en COP
+   - Ejemplo: `Descuento: 15% (-$2,250)`
+
+5. **Ganancias calculan correctamente:**
+   - Sistema resta automáticamente los descuentos
+   - Reportes muestran ganancias reales (sin inflado)
+
+### Impacto en Márgenes (Ejemplo 12oz $12,500)
+```
+Sin descuento:  $12,500 → Margen ~$8,695 (69%)
+Con 10% OFF:    $11,250 → Margen ~$7,895 (70% de 11,250)
+Con 15% OFF:    $10,625 → Margen ~$7,420 (70% de 10,625)
+Con 20% OFF:    $10,000 → Margen ~$7,000 (70% de 10,000)
+```
+
+### Casos de Uso Sugeridos
+- **10%:** Compra 2+ granizados
+- **15%:** Temporada alta / Happy Hour
+- **20%:** Liquidación o promociónEspecial
+
+---
+
 ## Gestión Inteligente de Pedidos
 
 ### Prevención de Duplicados (Conexión Lenta)
@@ -324,7 +366,7 @@ Este proyecto es propiedad de ARTIKA GRANIZADOS.
 ---
 
 **Última actualización:** Agosto 2026  
-**Versión:** 1.1.0 - Mejoras en manejo de pedidos  
+**Versión:** 1.2.0 - Sistema de descuentos  
 **Estado:** ✅ En producción  
 **URL:** https://artika-pos.pages.dev  
 **GitHub:** https://github.com/Cristian1823/artika-pos
@@ -338,9 +380,20 @@ Este proyecto es propiedad de ARTIKA GRANIZADOS.
 - ✅ Deploy en Cloudflare Pages
 - ✅ Repositorio GitHub con README
 - ✅ Branding Neon personalizado
-- ✅ **NUEVO v1.1:** Prevención de duplicados por conexión lenta
-- ✅ **NUEVO v1.1:** Eliminación de pedidos duplicados desde pantalla de cobro
-- ✅ **NUEVO v1.1:** IDs secuenciales cortos (PED-0001, etc.)
-- ✅ **NUEVO v1.1:** Visualización limpia de pedidos (sin caracteres codificados)
-- ✅ **NUEVO v1.1:** Validación automática de PIN en ganancias
-- ✅ **NUEVO v1.1:** Google Apps Script con función eliminarPedidoAPI
+
+**v1.1 - Mejoras en Manejo de Pedidos:**
+- ✅ Prevención de duplicados por conexión lenta
+- ✅ Eliminación de pedidos duplicados desde pantalla de cobro
+- ✅ IDs secuenciales cortos (PED-0001, etc.)
+- ✅ Visualización limpia de pedidos (sin caracteres codificados)
+- ✅ Validación automática de PIN en ganancias
+- ✅ Google Apps Script con función eliminarPedidoAPI
+
+**v1.2 - Sistema de Descuentos:**
+- ✅ Selector de descuentos: 0%, 10%, 15%, 20%
+- ✅ Descuentos por producto (no global)
+- ✅ Visualización clara en carrito (precio original vs final)
+- ✅ Descuentos visibles en pantalla de COBRO
+- ✅ Ganancias calculadas correctamente (descuentos restados)
+- ✅ Google Sheets guarda información de descuentos aplicados
+- ✅ Reportes precisos con impacto de descuentos
