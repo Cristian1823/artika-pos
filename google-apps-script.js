@@ -367,6 +367,8 @@ function guardarPedidoAPI(params) {
 
     const items = decodeURIComponent(params.items);
     const total = parseInt(params.total);
+    const descuentoAplicado = params.descuentoAplicado || 0;
+    const montoDescuento = params.montoDescuento || 0;
     const dulce = params.dulce || "";
     const alcohol = params.alcohol || "";
     const notas = decodeURIComponent(params.notas || "");
@@ -380,7 +382,7 @@ function guardarPedidoAPI(params) {
       total,
       dulce,
       alcohol,
-      `${notas}`,
+      `${notas}${descuentoAplicado > 0 ? ` | Descuento: ${descuentoAplicado}% (-$${montoDescuento})` : ''}`,
       "pendiente"
     ]);
 
@@ -490,11 +492,22 @@ function getResumen(params) {
     }
 
     if (total > 0 && cumpleFiltro) {
-      totalVentas += total;
+      // Calcular descuentos del pedido
+      let descuentoPedido = 0;
+      const notas = String(data[i][7]) || '';
+      const matchDescuento = notas.match(/Descuento: (\d+)%\s*\(-\$(\d+(?:,\d{3})*(?:\.\d{2})?)\)/);
+      if (matchDescuento) {
+        descuentoPedido = parseInt(matchDescuento[2].replace(/,/g, '')) || 0;
+      }
+
+      // Restar descuento del total para cálculo de ganancias
+      const totalSinDescuento = total + descuentoPedido;
+
+      totalVentas += totalSinDescuento;
       cantidadPedidos++;
 
-      // Estimar costo (aproximado: 30% del total)
-      const costoPedido = Math.round(total * 0.30);
+      // Estimar costo (aproximado: 30% del total SIN descuento)
+      const costoPedido = Math.round(totalSinDescuento * 0.30);
       totalCosto += costoPedido;
 
       // Procesar items del pedido
@@ -504,7 +517,8 @@ function getResumen(params) {
           items.forEach(item => {
             const idProducto = item.idProducto || 'Desconocido';
             const tipoProducto = item.tipo || 'granizado';
-            const precio = item.total || 0;
+            // Usar precio original sin descuento para estadísticas
+            const precioOriginal = item.precio || 0;
 
             if (!productosMap[idProducto]) {
               productosMap[idProducto] = {
@@ -516,7 +530,7 @@ function getResumen(params) {
               };
             }
             productosMap[idProducto].cantidad++;
-            productosMap[idProducto].ingreso += precio;
+            productosMap[idProducto].ingreso += precioOriginal;
           });
         }
       } catch(e) {

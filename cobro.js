@@ -84,6 +84,16 @@ function actualizarPedidosList() {
     } catch(e) {
       // Si ya está decodificado, lo dejamos como está
     }
+
+    // Extraer información de descuentos
+    let descuentoInfo = '';
+    let descuentoMatch = notasLimpio.match(/Descuento: (\d+)%\s*\(-\$([0-9,]+)\)/);
+    if (descuentoMatch) {
+      descuentoInfo = `<div style="color: #00d4aa; font-size: 0.85em; margin-top: 5px;">🏷️ ${descuentoMatch[1]}% OFF -$${descuentoMatch[2]}</div>`;
+      // Remover descuento de notas para mostrar limpio
+      notasLimpio = notasLimpio.replace(/\s*\|\s*Descuento: \d+%\s*\(-\$[0-9,]+\)/, '').trim();
+    }
+
     // Remover "Cambio: $0" del final si existe
     notasLimpio = notasLimpio.replace(/\s*\|\s*Cambio:\s*\$\d+\s*$/, '').trim();
 
@@ -104,6 +114,7 @@ function actualizarPedidosList() {
           🕐 ${fecha} - ${hora}<br>
           📝 ${notasLimpio}
         </div>
+        ${descuentoInfo}
       </div>
       <div style="display: flex; gap: 10px; align-items: center;">
         <div class="cart-item-price">$${total.toLocaleString('es-CO')}</div>

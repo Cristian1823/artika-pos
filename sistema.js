@@ -6,6 +6,7 @@ const API_URL = `https://script.google.com/macros/s/AKfycbxRZPNJXwywxdLBAsmQH2DF
 // DATOS LOCALES
 let carrito = [];
 let guardandoPedido = false;
+let descuentoSeleccionado = 0;
 
 // ============================================
 // INICIALIZACIÓN
@@ -15,10 +16,37 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ============================================
+// FUNCIONES DE DESCUENTO
+// ============================================
+function seleccionarDescuento(porcentaje) {
+  descuentoSeleccionado = porcentaje;
+
+  // Actualizar UI
+  document.querySelectorAll('[id^="desc-"]').forEach(btn => btn.style.background = '');
+  document.querySelectorAll('[id^="desc-"]').forEach(btn => btn.style.color = '');
+
+  const btnSeleccionado = document.getElementById(`desc-${porcentaje}`);
+  if (btnSeleccionado) {
+    btnSeleccionado.style.background = '#00d4aa';
+    btnSeleccionado.style.color = '#0A0E27';
+  }
+
+  document.getElementById('descuentoActual').textContent = `Descuento actual: ${porcentaje}%`;
+  console.log(`💰 Descuento seleccionado: ${porcentaje}%`);
+}
+
+function obtenerDescuentoSeleccionado() {
+  return descuentoSeleccionado;
+}
+
+// ============================================
 // AGREGAR AL CARRITO (AUTOMÁTICO)
 // ============================================
-function agregarAlCarrito(id, oz, conAlcohol, precio) {
+function agregarAlCarrito(id, oz, conAlcohol, precio, descuento = 0) {
   const tipoAlcohol = conAlcohol ? '🍺 Con Alcohol' : '❄️ Sin Alcohol';
+
+  const precioConDescuento = Math.round(precio * (1 - descuento / 100));
+  const montoDescuento = precio - precioConDescuento;
 
   const item = {
     id: Date.now(),
@@ -28,13 +56,15 @@ function agregarAlCarrito(id, oz, conAlcohol, precio) {
     conAlcohol: conAlcohol,
     alcohol: tipoAlcohol,
     precio: precio,
-    total: precio
+    descuento: descuento,
+    montoDescuento: montoDescuento,
+    total: precioConDescuento
   };
 
   carrito.push(item);
   actualizarCarrito();
 
-  console.log(`✅ Item agregado: ${oz} ${tipoAlcohol} - $${precio}`, item);
+  console.log(`✅ Item agregado: ${oz} ${tipoAlcohol} - $${precio} (Descuento: ${descuento}%)`, item);
 }
 
 // ============================================
@@ -64,22 +94,31 @@ function actualizarCarrito() {
   cartItems.innerHTML = '';
 
   let subtotal = 0;
+  let totalDescuentos = 0;
 
   carrito.forEach((item, index) => {
     subtotal += item.total;
+    totalDescuentos += item.montoDescuento || 0;
 
     const itemDiv = document.createElement('div');
     itemDiv.className = 'cart-item';
 
     let itemHTML = '';
+    let detalleDescuento = '';
 
     if (item.tipo === 'granizado') {
+      if (item.descuento > 0) {
+        detalleDescuento = `<div style="color: #00d4aa; font-size: 0.85em;">-${item.descuento}% DESCUENTO -$${item.montoDescuento.toLocaleString('es-CO')}</div>`;
+      }
+
       itemHTML = `
         <div class="cart-item-info">
           <div class="cart-item-name">${item.tamaño} ${item.alcohol}</div>
           <div class="cart-item-details">
             🍬 Incluye dulce
+            ${item.descuento > 0 ? `<br>💰 Precio original: $${item.precio.toLocaleString('es-CO')}` : ''}
           </div>
+          ${detalleDescuento}
         </div>
       `;
     } else if (item.tipo === 'jeringa') {
@@ -166,6 +205,15 @@ function enviarACocina() {
   const jeringasCount = carrito.filter(i => i.tipo === 'jeringa').length;
   const jeringasInfo = jeringasCount > 0 ? `${jeringasCount} jeringa(s)` : 'Sin jeringas';
 
+  // Calcular descuentos aplicados
+  let montoDescuentoTotal = 0;
+  let descuentoPromedio = 0;
+  const itemsConDescuento = carrito.filter(i => i.descuento > 0);
+  if (itemsConDescuento.length > 0) {
+    montoDescuentoTotal = itemsConDescuento.reduce((sum, i) => sum + (i.montoDescuento || 0), 0);
+    descuentoPromedio = itemsConDescuento[0].descuento;
+  }
+
   try {
     const params = {
       action: 'guardarPedido',
@@ -174,6 +222,8 @@ function enviarACocina() {
       dulce: 'Incluido en cada granizado',
       alcohol: carrito.some(i => i.tipo === 'granizado' && i.conAlcohol) ? 'Sí' : 'No',
       notas: encodeURIComponent(`${jeringasInfo} | Pendiente de cobro`),
+      descuentoAplicado: descuentoPromedio,
+      montoDescuento: montoDescuentoTotal,
       cambio: 0,
       callback: callbackName
     };
