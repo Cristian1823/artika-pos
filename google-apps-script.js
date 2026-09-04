@@ -446,7 +446,7 @@ function getPedidosHoy() {
 }
 
 // ============================================
-// API: GET RESUMEN (GANANCIAS)
+// API: GET RESUMEN (GANANCIAS) - OPTIMIZADO
 // ============================================
 function getResumen(params) {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Pedidos");
@@ -454,17 +454,23 @@ function getResumen(params) {
 
   let totalVentas = 0;
   let totalCosto = 0;
-  let totalGastoOp = 75000;
   let cantidadPedidos = 0;
   const productosMap = {};
 
-  const filtroFecha = params?.fecha; // Ej: "21/8/2026"
+  const filtroFecha = params?.fecha;
   const filtroFechaInicio = params?.fechaInicio;
   const filtroFechaFin = params?.fechaFin;
 
+  // Compilar regex una sola vez (fuera del loop)
+  const regexDescuento = /Descuento: (\d+)%\s*\(-\$(\d+(?:,\d{3})*)\)/;
+
   // Procesar pedidos
   for (let i = 1; i < data.length; i++) {
-    // Convertir fecha a string YYYY-MM-DD (Google Sheets la guarda como Date object)
+    const total = parseInt(data[i][4]) || 0;
+
+    if (total <= 0) continue; // Saltar si no hay total
+
+    // Convertir fecha UNA SOLA VEZ
     let fechaStr = "";
     const fechaData = data[i][1];
     if (fechaData instanceof Date) {
@@ -476,49 +482,45 @@ function getResumen(params) {
       fechaStr = String(fechaData).trim();
     }
 
-    const total = parseInt(data[i][4]) || 0;
-
-    // Filtrar por fecha si se proporciona
+    // Verificar filtro de fecha
     let cumpleFiltro = true;
     if (filtroFecha) {
-      // Comparar fechas en formato YYYY-MM-DD
-      const filtroFechaTrim = String(filtroFecha).trim();
-      cumpleFiltro = fechaStr === filtroFechaTrim;
+      cumpleFiltro = fechaStr === String(filtroFecha).trim();
     } else if (filtroFechaInicio && filtroFechaFin) {
-      // Comparar fechas en formato YYYY-MM-DD
       const inicioStr = String(filtroFechaInicio).trim();
       const finStr = String(filtroFechaFin).trim();
       cumpleFiltro = fechaStr >= inicioStr && fechaStr <= finStr;
     }
 
-    if (total > 0 && cumpleFiltro) {
-      // Calcular descuentos del pedido
-      let descuentoPedido = 0;
-      const notas = String(data[i][7]) || '';
-      const matchDescuento = notas.match(/Descuento: (\d+)%\s*\(-\$(\d+(?:,\d{3})*(?:\.\d{2})?)\)/);
-      if (matchDescuento) {
-        descuentoPedido = parseInt(matchDescuento[2].replace(/,/g, '')) || 0;
+    if (!cumpleFiltro) continue; // Saltar si no cumple filtro
+
+    // Extraer descuento de forma más eficiente
+    let descuentoPedido = 0;
+    const notas = data[i][7];
+    if (notas) {
+      const notasStr = String(notas);
+      const match = notasStr.match(regexDescuento);
+      if (match) {
+        descuentoPedido = parseInt(match[2].replace(/,/g, '')) || 0;
       }
+    }
 
-      // Restar descuento del total para cálculo de ganancias
-      const totalSinDescuento = total + descuentoPedido;
+    const totalSinDescuento = total + descuentoPedido;
+    totalVentas += totalSinDescuento;
+    cantidadPedidos++;
 
-      totalVentas += totalSinDescuento;
-      cantidadPedidos++;
+    // Calcular costo (30% del total)
+    totalCosto += Math.round(totalSinDescuento * 0.30);
 
-      // Estimar costo (aproximado: 30% del total SIN descuento)
-      const costoPedido = Math.round(totalSinDescuento * 0.30);
-      totalCosto += costoPedido;
-
-      // Procesar items del pedido
+    // Procesar items (opcional: solo si necesitas estadísticas de productos)
+    const itemsStr = data[i][3];
+    if (itemsStr) {
       try {
-        const items = JSON.parse(data[i][3]);
+        const items = JSON.parse(itemsStr);
         if (Array.isArray(items)) {
-          items.forEach(item => {
+          for (let j = 0; j < items.length; j++) {
+            const item = items[j];
             const idProducto = item.idProducto || 'Desconocido';
-            const tipoProducto = item.tipo || 'granizado';
-            // Usar precio original sin descuento para estadísticas
-            const precioOriginal = item.precio || 0;
 
             if (!productosMap[idProducto]) {
               productosMap[idProducto] = {
@@ -526,15 +528,15 @@ function getResumen(params) {
                 nombre: item.tamaño ? `${item.tamaño} ${item.alcohol || ''}` : 'Jeringa',
                 cantidad: 0,
                 ingreso: 0,
-                tipo: tipoProducto
+                tipo: item.tipo || 'granizado'
               };
             }
             productosMap[idProducto].cantidad++;
-            productosMap[idProducto].ingreso += precioOriginal;
-          });
+            productosMap[idProducto].ingreso += (item.precio || 0);
+          }
         }
       } catch(e) {
-        // Error parseando JSON, ignorar
+        // Ignorar errores de JSON
       }
     }
   }

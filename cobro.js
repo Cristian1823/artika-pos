@@ -97,30 +97,43 @@ function actualizarPedidosList() {
     // Remover "Cambio: $0" del final si existe
     notasLimpio = notasLimpio.replace(/\s*\|\s*Cambio:\s*\$\d+\s*$/, '').trim();
 
-    itemDiv.innerHTML = `
-      <div class="cart-item-info" style="cursor: pointer; flex: 1;" onclick="abrirCobro({
-        id: '${pedido.id}',
-        fecha: '${fecha}',
-        hora: '${hora}',
-        items: '${pedido.items.replace(/'/g, "\\'")}',
-        total: ${total},
-        dulce: '${pedido.dulce}',
-        alcohol: '${pedido.alcohol}',
-        notas: '${notasLimpio.replace(/'/g, "\\'")}',
-        estado: '${pedido.estado}'
-      })">
-        <div class="cart-item-name">📋 ${pedido.id}</div>
-        <div class="cart-item-details">
-          🕐 ${fecha} - ${hora}<br>
-          📝 ${notasLimpio}
-        </div>
-        ${descuentoInfo}
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'cart-item-info';
+    infoDiv.style.cursor = 'pointer';
+    infoDiv.style.flex = '1';
+    infoDiv.onclick = () => abrirCobro(pedido);
+    infoDiv.innerHTML = `
+      <div class="cart-item-name">📋 ${pedido.id}</div>
+      <div class="cart-item-details">
+        🕐 ${fecha} - ${hora}<br>
+        📝 ${notasLimpio}
       </div>
-      <div style="display: flex; gap: 10px; align-items: center;">
-        <div class="cart-item-price">$${total.toLocaleString('es-CO')}</div>
-        <button class="btn-remove-item" onclick="event.stopPropagation(); eliminarPedidoDuplicado('${pedido.id}')" title="Eliminar este pedido">✕</button>
-      </div>
+      ${descuentoInfo}
     `;
+
+    const actionDiv = document.createElement('div');
+    actionDiv.style.display = 'flex';
+    actionDiv.style.gap = '10px';
+    actionDiv.style.alignItems = 'center';
+
+    const priceDiv = document.createElement('div');
+    priceDiv.className = 'cart-item-price';
+    priceDiv.textContent = `$${total.toLocaleString('es-CO')}`;
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'btn-remove-item';
+    deleteBtn.textContent = '✕';
+    deleteBtn.title = 'Eliminar este pedido';
+    deleteBtn.onclick = (e) => {
+      e.stopPropagation();
+      eliminarPedidoDuplicado(pedido.id);
+    };
+
+    actionDiv.appendChild(priceDiv);
+    actionDiv.appendChild(deleteBtn);
+
+    itemDiv.appendChild(infoDiv);
+    itemDiv.appendChild(actionDiv);
 
     container.appendChild(itemDiv);
   });
