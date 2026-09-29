@@ -517,6 +517,7 @@ body {
 
 .input-billete {
   flex: 1;
+  min-width: 0;
   padding: 12px;
   background: rgba(255, 255, 255, 0.05);
   border: 2px solid var(--cyan);

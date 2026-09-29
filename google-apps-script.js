@@ -357,9 +357,26 @@ function guardarPedidoAPI(params) {
   try {
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Pedidos");
 
-    // Generar ID secuencial corto
-    const data = sheet.getDataRange().getValues();
-    const numeroSecuencial = data.length; // Usa el número de filas (incluyendo header)
+    // Generar ID secuencial único (contador persistente, no depende del número de filas)
+    // Esto evita IDs duplicados cuando se elimina un pedido y baja el conteo de filas
+    const props = PropertiesService.getScriptProperties();
+    let ultimoId = parseInt(props.getProperty('ultimoPedidoId'));
+
+    if (isNaN(ultimoId)) {
+      // Primera vez que corre el contador: arrancar después del ID más alto ya existente
+      const idsExistentes = sheet.getDataRange().getValues();
+      ultimoId = 0;
+      for (let i = 1; i < idsExistentes.length; i++) {
+        const match = String(idsExistentes[i][0]).match(/PED-(\d+)/);
+        if (match) {
+          const n = parseInt(match[1]);
+          if (n > ultimoId) ultimoId = n;
+        }
+      }
+    }
+
+    const numeroSecuencial = ultimoId + 1;
+    props.setProperty('ultimoPedidoId', String(numeroSecuencial));
     const id = "PED-" + String(numeroSecuencial).padStart(4, '0');
 
     const fecha = formatoFecha(new Date());
@@ -448,6 +465,9 @@ function getPedidosHoy() {
 // ============================================
 // API: GET RESUMEN (GANANCIAS) - OPTIMIZADO
 // ============================================
+// % de insumos sobre el total vendido, usado como estimado en el panel de ganancias.
+const PORCENTAJE_INSUMOS = 0.35;
+
 function getResumen(params) {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Pedidos");
   const data = sheet.getDataRange().getValues();
@@ -510,7 +530,7 @@ function getResumen(params) {
     cantidadPedidos++;
 
     // Calcular costo (30% del total)
-    totalCosto += Math.round(totalSinDescuento * 0.30);
+    totalCosto += Math.round(totalSinDescuento * PORCENTAJE_INSUMOS);
 
     // Procesar items (opcional: solo si necesitas estadísticas de productos)
     const itemsStr = data[i][3];
@@ -548,7 +568,7 @@ function getResumen(params) {
 
   // Calcular costo estimado para cada producto
   productosArray.forEach(prod => {
-    prod.costo = Math.round(prod.ingreso * 0.30);
+    prod.costo = Math.round(prod.ingreso * PORCENTAJE_INSUMOS);
   });
 
   // Calcular días en el período filtrado
@@ -603,16 +623,27 @@ function actualizarPedidoAPI(params) {
     const notas = decodeURIComponent(params.notas || "");
     const estado = params.estado || "pendiente";
 
+    // Si hay IDs duplicados (por un bug histórico ya corregido), preferir la fila
+    // que sigue "pendiente" en vez de quedarse con la primera coincidencia a ciegas
+    let filaObjetivo = -1;
     for (let i = 1; i < data.length; i++) {
       if (data[i][0] === id) {
-        sheet.getRange(i + 1, 8).setValue(notas);
-        sheet.getRange(i + 1, 9).setValue(estado);
-
-        return {
-          success: true,
-          mensaje: "Pedido actualizado"
-        };
+        const filaEsPendiente = data[i][8] === 'pendiente' || !data[i][8];
+        if (filaObjetivo === -1 || filaEsPendiente) {
+          filaObjetivo = i;
+          if (filaEsPendiente) break;
+        }
       }
+    }
+
+    if (filaObjetivo !== -1) {
+      sheet.getRange(filaObjetivo + 1, 8).setValue(notas);
+      sheet.getRange(filaObjetivo + 1, 9).setValue(estado);
+
+      return {
+        success: true,
+        mensaje: "Pedido actualizado"
+      };
     }
 
     return {
@@ -637,15 +668,26 @@ function eliminarPedidoAPI(params) {
 
     const id = params.id;
 
+    // Si hay IDs duplicados (por un bug histórico ya corregido), preferir la fila
+    // que sigue "pendiente" en vez de quedarse con la primera coincidencia a ciegas
+    let filaObjetivo = -1;
     for (let i = 1; i < data.length; i++) {
       if (data[i][0] === id) {
-        sheet.deleteRow(i + 1);
-
-        return {
-          success: true,
-          mensaje: `Pedido ${id} eliminado correctamente`
-        };
+        const filaEsPendiente = data[i][8] === 'pendiente' || !data[i][8];
+        if (filaObjetivo === -1 || filaEsPendiente) {
+          filaObjetivo = i;
+          if (filaEsPendiente) break;
+        }
       }
+    }
+
+    if (filaObjetivo !== -1) {
+      sheet.deleteRow(filaObjetivo + 1);
+
+      return {
+        success: true,
+        mensaje: `Pedido ${id} eliminado correctamente`
+      };
     }
 
     return {
